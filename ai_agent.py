@@ -10,9 +10,9 @@ GITHUB_PAT = os.getenv("GITHUB_PAT")  # Uses an environment variable
 REPO_PATH = r"C:\Users\DELL\Desktop\ai-agent\restaurant-hotel-pos"
 
 def generate_code(user_prompt):
-    """Simulate AI generating code based on user input and saving it."""
-    if "Generate Django models" in user_prompt:
-        django_models = """
+    """Generate code based on user input and save it to the correct file."""
+    code_snippets = {
+        "Generate Django models": ("models.py", """
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
@@ -57,17 +57,29 @@ class InventoryItem(models.Model):
     name = models.CharField(max_length=255)
     quantity = models.IntegerField()
     supplier = models.CharField(max_length=255)
-"""
-        file_path = os.path.join(REPO_PATH, "models.py")
-        with open(file_path, 'w') as file:
-            file.write(django_models)
-        print("✅ Django models generated and saved locally.")
+"""),
+        "Generate Django views": ("views.py", """
+from django.shortcuts import render
+from django.http import JsonResponse
+from .models import *
 
-    else:
-        print("⚠️ Invalid request. Please enter a valid command.")
+def home(request):
+    return JsonResponse({"message": "Welcome to Restaurant & Hotel POS System!"})
+""")
+    }
+
+    for key, (filename, content) in code_snippets.items():
+        if key in user_prompt:
+            file_path = os.path.join(REPO_PATH, filename)
+            with open(file_path, 'w') as file:
+                file.write(content)
+            print(f"✅ {filename} generated and saved locally.")
+            return
+
+    print("⚠️ Invalid request. Please enter a valid command.")
 
 def git_commit_push():
-    """Automatically commit and push code to GitHub."""
+    """Automatically commit and push code to GitHub if there are changes."""
     os.chdir(REPO_PATH)
 
     # Add only if there are changes
